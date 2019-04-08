@@ -12,6 +12,8 @@
 #include <glm/glm.hpp>
 using namespace glm;
 
+#include <common/shader.hpp>
+
 int main(){
 
     glewExperimental = true; // Needed for core profile
