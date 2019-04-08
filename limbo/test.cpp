@@ -76,9 +76,14 @@ int main(){
     // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
     
+    // Create and compile our GLSL program from the shaders
+    GLuint programID = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
+    
     do{
         // Clear the screen. It's not mentioned before Tutorial 02, but it can cause flickering, so it's there nonetheless.
-        glClear( GL_COLOR_BUFFER_BIT );
+        // glClear( GL_COLOR_BUFFER_BIT );
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
         // Make the triangle after clearing the screen, right???
         // 1st attribute buffer : vertices
@@ -92,12 +97,15 @@ int main(){
                               0,                  // stride
                               (void*)0            // array buffer offset
                               );
+
+
+        glUseProgram(programID);
+
+        
         // Draw the triangle !
         glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
         glDisableVertexAttribArray(0);
 
-        
-        // Draw nothing, see you in tutorial 2 !
         
         // Swap buffers
         glfwSwapBuffers(window);
