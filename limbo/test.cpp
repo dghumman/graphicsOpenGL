@@ -10,9 +10,13 @@
 
 // Include GLM
 #include <glm/glm.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 using namespace glm;
 
 #include <common/shader.hpp>
+
 
 int main(){
 
@@ -48,6 +52,36 @@ int main(){
     fprintf( stdout, "Tick\n" );
     
     // I've just created a window, now gonna make a Vertex Array Object for the triangle
+
+    
+//    glm::mat4 myScalingMatrix = glm::scale(2.0f, 2.0f ,2.0f);
+    //glm::mat4 myScalingMatrix = glm::scale(glm::vec3(2.0f, 2.0f, 2.0f));
+
+    glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 2.0f));
+    
+    glm::vec3 myRotationAxis(0, 1, 0);
+    glm::rotate( 60.0f, myRotationAxis );
+    
+    //glm::mat4 ViewMatrix = glm::translate(glm::mat4(), glm::vec3(-3.0f, 0.0f ,0.0f));
+    
+    
+    // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+    glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (float) 640 / (float)480, 0.1f, 100.0f);
+    
+    // Camera matrix
+    glm::mat4 View = glm::lookAt(
+                                 glm::vec3(4,3,3), // Camera is at (4,3,3), in World Space
+                                 glm::vec3(0,0,0), // and looks at the origin
+                                 glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+                                 );
+    
+    // Model matrix : an identity matrix (model will be at the origin)
+    glm::mat4 Model = glm::mat4(1.0f);
+    
+    // Our ModelViewProjection : multiplication of our 3 matrices
+    glm::mat4 mvp = Projection * View * Model; // Remember, matrix multiplication is the other way around
+
+    //End of Matrix Stuff
     
     GLuint VertexArrayID;
     glGenVertexArrays(1, &VertexArrayID);
@@ -79,11 +113,21 @@ int main(){
     // Create and compile our GLSL program from the shaders
     GLuint programID = LoadShaders( "SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader" );
     
+    // Get a handle for our "MVP" uniform
+    // Only during the initialisation
+    GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+    
+    //Step 3
+    
+    // Send our transformation to the currently bound shader, in the "MVP" uniform
+
     do{
         // Clear the screen. It's not mentioned before Tutorial 02, but it can cause flickering, so it's there nonetheless.
         // glClear( GL_COLOR_BUFFER_BIT );
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // This is done in the main loop since each model will have a different MVP matrix (At least for the M part)
+        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
 
         // Make the triangle after clearing the screen, right???
         // 1st attribute buffer : vertices
