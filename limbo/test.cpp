@@ -6,6 +6,40 @@
 
 #include <common/shader.hpp>
 
+float float_rand( float min, float max ) {
+    float scale = rand() / (float) RAND_MAX; /* [0, 1.0] */
+    return min + scale * ( max - min );      /* [min, max] */
+}
+
+void buildPoint(float x, float y, float z, GLfloat* data) {
+    data[0] = x;
+    data[1] = y;
+    data[2] = z;
+}
+
+void buildSquare(float x, float y, float z,
+                 float dx1, float dy1, float dz1,
+                 float dx2, float dy2, float dz2,
+                 GLfloat* data) {
+    buildPoint(x-dx1-dx2, y-dy1-dy2, z-dz1-dz2, data);
+    buildPoint(x+dx1-dx2, y+dy1-dy2, z+dz1-dz2, data+3);
+    buildPoint(x+dx1+dx2, y+dy1+dy2, z+dz1+dz2, data+6);
+    buildPoint(x-dx1-dx2, y-dy1-dy2, z-dz1-dz2, data+9);
+    buildPoint(x-dx1+dx2, y-dy1+dy2, z-dz1+dz2, data+12);
+    buildPoint(x+dx1+dx2, y+dy1+dy2, z+dz1+dz2, data+15);
+}
+
+void buildCube(float x, float y, float z, float s, GLfloat* data) {
+    s = s/2;
+    // TODO: render front in front of back so this weird order isn't needed
+    buildSquare(x+s,y  ,z  , 0,s,0, 0,0,s, data+18*5);
+    buildSquare(x-s,y  ,z  , 0,s,0, 0,0,s, data);
+    buildSquare(x  ,y+s,z  , s,0,0, 0,0,s, data+18*2);
+    buildSquare(x  ,y-s,z  , s,0,0, 0,0,s, data+18*3);
+    buildSquare(x  ,y  ,z+s, s,0,0, 0,s,0, data+18*4);
+    buildSquare(x  ,y  ,z-s, s,0,0, 0,s,0, data+18);
+}
+
 int main(){
     setupGlew(); // Must be before setupGLFW
     setupGLFW();
@@ -37,12 +71,10 @@ int main(){
     }
     
     // I've just created a window, now gonna make a Vertex Array Object for the triangle
-    // An array of 3 vectors which represents 3 vertices
-    static const GLfloat g_vertex_buffer_data[] = {
-        -1.0f, -1.0f, 0.0f,
-        1.0f, -1.0f, 0.0f,
-        0.0f,  1.0f, 0.0f,
-    };
+    // An array of 12 vectors which represents 3 vertices
+    static GLfloat g_vertex_buffer_data[6*2*3*3];
+    buildCube(0,0,0,2,g_vertex_buffer_data);
+
     
     // This will identify our vertex buffer
     GLuint vertexbuffer;
@@ -52,6 +84,30 @@ int main(){
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
     // Give our vertices to OpenGL.
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+    
+    // One color for each vertex. They were generated randomly.
+    static GLfloat g_color_buffer_data[34*3];
+    for (int i=0; i<34*3; i++) {
+        g_color_buffer_data[i] = float_rand( 0.0f, 1.0f);
+    }
+    
+    GLuint colorbuffer;
+    glGenBuffers(1, &colorbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
+    
+    // 2nd attribute buffer : colors
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+    glVertexAttribPointer(
+      1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+      3,                                // size
+      GL_FLOAT,                         // type
+      GL_FALSE,                         // normalized?
+      0,                                // stride
+      (void*)0                          // array buffer offset
+  );
+
     
     
     
@@ -93,8 +149,10 @@ int main(){
 
         
         // Draw the triangle !
-        glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
+        glDrawArrays(GL_TRIANGLES, 0, 3*12); // Starting from vertex 0; 3 vertices total -> 1 triangle
         glDisableVertexAttribArray(0);
+        
+        
 
         
         // Swap buffers
