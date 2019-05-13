@@ -4,6 +4,7 @@
 
 #include <limbo/setup.hpp>
 
+#include <common/controls.hpp>
 #include <common/shader.hpp>
 #include <common/buildShapes.hpp>
 
@@ -21,24 +22,6 @@ int main(){
     setupGLFW();
     GLFWwindow* window = getGLFWWindow();
  
-    glm::mat4 mvp;
-    {
-        // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-        const glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.f/3, 0.1f, 100.0f);
-        
-        // Setup a camera, look at the origin
-        const glm::vec3 CameraPosition(4,3,3);
-        const glm::vec3 Origin(0,0,0);
-        const glm::vec3 UpDirection(0,1,0);
-        glm::mat4 View = glm::lookAt(CameraPosition, Origin, UpDirection);
-        
-        // Model matrix : an identity matrix (model will be at the origin)
-        glm::mat4 Model = glm::mat4(1.0f);
-        
-        // Our ModelViewProjection : multiplication of our 3 matrices
-        mvp = Projection * View * Model;
-    }
-
     // The tutorial said to not think about these 3 lines very much
     {
         GLuint VertexArrayID;
@@ -101,6 +84,25 @@ int main(){
     while (glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
            glfwWindowShouldClose(window) == 0 ) {
 
+        glm::mat4 mvp;
+        {
+            computeMatricesFromInputs(window);
+            // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+            const glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.f/3, 0.1f, 100.0f);
+            
+            // Setup a camera, look at the origin
+            const glm::vec3 CameraPosition(4,3,3);
+            const glm::vec3 Origin(0,0,0);
+            const glm::vec3 UpDirection(0,1,0);
+            glm::mat4 View = glm::lookAt(CameraPosition, Origin, UpDirection);
+            
+            // Model matrix : an identity matrix (model will be at the origin)
+            glm::mat4 Model = glm::mat4(1.0f);
+            
+            // Our ModelViewProjection : multiplication of our 3 matrices
+            mvp = Projection * View * Model;
+        }
+        
         // Clear the screen. It's not mentioned before Tutorial 02, but it can cause flickering, so it's there nonetheless.
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
