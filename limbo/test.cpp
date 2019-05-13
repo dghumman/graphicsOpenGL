@@ -48,8 +48,8 @@ int main(){
     
     // I've just created a window, now gonna make a Vertex Array Object for the triangle
     // An array of 12 vectors which represents 3 vertices
-    static GLfloat g_vertex_buffer_data[6*2*3*3];
-    ShapeBuilder::buildCube(0,0,0,2,g_vertex_buffer_data);
+    static vector<GLfloat> g_vertex_buffer;
+    ShapeBuilder::buildCube(0,0,0,1,&g_vertex_buffer);
 
     
     // This will identify our vertex buffer
@@ -59,7 +59,7 @@ int main(){
     // The following commands will talk about our 'vertexbuffer' buffer
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
     // Give our vertices to OpenGL.
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, g_vertex_buffer.size()*sizeof(g_vertex_buffer.data()), g_vertex_buffer.data(), GL_STATIC_DRAW);
     
     // One color for each vertex. They were generated randomly.
     static GLfloat g_color_buffer_data[34*3];
