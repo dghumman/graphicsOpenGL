@@ -53,7 +53,10 @@ void computeMatricesFromInputs(GLFWwindow* window){
 
     // Move forward
     if (glfwGetKey(window, GLFW_KEY_UP ) == GLFW_PRESS){
+//        std::cout << "Up key presed" << std::endl;
+//        std::cout << "Position: " << position.x << " "  << position.y << " "  << position.z << std::endl;
         position += direction * deltaTime * speed;
+//        std::cout << "Position: " << position.x << " "  << position.y << " "  << position.z << std::endl;
     }
     // Move backward
     if (glfwGetKey(window, GLFW_KEY_DOWN ) == GLFW_PRESS){
@@ -85,4 +88,19 @@ void computeMatricesFromInputs(GLFWwindow* window){
     
     // For the next frame, the "last time" will be "now"
     lastTime = currentTime;
+}
+
+glm::mat4 getProjectionMatrix() {
+    // Projection matrix : 45&deg; Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+    return glm::perspective(glm::radians(45.0f), 4.f/3, 0.1f, 100.0f);
+}
+
+glm::mat4 getViewMatrix() {
+
+    // Setup a camera, look at the origin
+//    const glm::vec3 CameraPosition(4,3,3);
+    const glm::vec3 Origin(0,0,0);
+    const glm::vec3 UpDirection(0,1,0);
+    return glm::lookAt(position, Origin, UpDirection);
+    
 }

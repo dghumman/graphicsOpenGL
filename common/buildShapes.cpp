@@ -26,12 +26,12 @@ public:
     static void buildCube(float x, float y, float z, float s, vector<GLfloat>* data) {
         s = s/2;
         // TODO: render front in front of back so this weird order isn't needed
+        buildSquare(x+s,y  ,z  , 0,s,0, 0,0,s, data);   // 1
         buildSquare(x-s,y  ,z  , 0,s,0, 0,0,s, data);   // 2
-        buildSquare(x  ,y  ,z-s, s,0,0, 0,s,0, data);   // 6
         buildSquare(x  ,y+s,z  , s,0,0, 0,0,s, data);   // 3
         buildSquare(x  ,y-s,z  , s,0,0, 0,0,s, data);   // 4
         buildSquare(x  ,y  ,z+s, s,0,0, 0,s,0, data);   // 5
-        buildSquare(x+s,y  ,z  , 0,s,0, 0,0,s, data);   // 1
+        buildSquare(x  ,y  ,z-s, s,0,0, 0,s,0, data);   // 6
     }
     
     
