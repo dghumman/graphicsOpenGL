@@ -45,6 +45,12 @@ int main(){
     // An array of 12 vectors which represents 3 vertices
     static vector<Triangle> unsortedTriangles, sortedTriangles;
     ShapeBuilder::buildCube(0,0,0,1,&unsortedTriangles);
+    for (int y=-20; y<20; y+=3) {
+        for (int x=-20; x<20; x+=3) {
+            unsortedTriangles.push_back(Triangle(Point(x, y, -5), Point(x, y+3, -5), Point(x+3, y+3, -5)));
+            unsortedTriangles.push_back(Triangle(Point(x, y, -5), Point(x+3, y, -5), Point(x+3, y+3, -5)));
+        }
+    }
     vector<pair<float, int> > triangleSortData;
     static vector<GLfloat> g_vertex_buffer;
 

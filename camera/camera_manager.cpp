@@ -28,7 +28,7 @@ public:
     glm::mat4 getViewMatrix() {
         // Setup a camera, look at the origin
         const glm::vec3 cameraPosition = getCameraPosition();
-        const glm::vec3 upDirection(0,1,0);
+        const glm::vec3 upDirection(0,0,1);
         return glm::lookAt(cameraPosition, mSubjectPosition, upDirection);
     }
     

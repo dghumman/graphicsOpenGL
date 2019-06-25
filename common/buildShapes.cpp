@@ -70,7 +70,6 @@ public:
     
     static void buildCube(float x, float y, float z, float s, vector<Triangle>* data) {
         s = s/2;
-        // TODO: render front in front of back so this weird order isn't needed
         buildParallelogram(x+s,y  ,z  , 0,s,0, 0,0,s, data);   // 1
         buildParallelogram(x-s,y  ,z  , 0,s,0, 0,0,s, data);   // 2
         buildParallelogram(x  ,y+s,z  , s,0,0, 0,0,s, data);   // 3
