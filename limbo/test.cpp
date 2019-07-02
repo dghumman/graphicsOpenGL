@@ -10,10 +10,7 @@
 #include <common/shader.hpp>
 #include <common/buildShapes.hpp>
 
-float float_rand( float min, float max ) {
-    float scale = rand() / (float) RAND_MAX; /* [0, 1.0] */
-    return min + scale * ( max - min );      /* [min, max] */
-}
+
 
 int main(){
     setupGlew(); // Must be before setupGLFW
@@ -43,38 +40,54 @@ int main(){
 
     // I've just created a window, now gonna make a Vertex Array Object for the triangle
     // An array of 12 vectors which represents 3 vertices
-    static vector<Triangle> unsortedTriangles, sortedTriangles;
-    ShapeBuilder::buildCube(0,0,0,1,&unsortedTriangles);
+    
+    
+    static vector<Triangle> unsortedTriangles, sortedTriangles, backgroundTriangles;
+    
+
+    //ShapeBuilder::buildCube(0,0,0,1,&unsortedTriangles);
+    
     for (int y=-20; y<20; y+=3) {
         for (int x=-20; x<20; x+=3) {
-            unsortedTriangles.push_back(Triangle(Point(x, y, -5), Point(x, y+3, -5), Point(x+3, y+3, -5)));
-            unsortedTriangles.push_back(Triangle(Point(x, y, -5), Point(x+3, y, -5), Point(x+3, y+3, -5)));
+            backgroundTriangles.push_back(Triangle(Point(x, y, -5), Point(x, y+3, -5), Point(x+3, y+3, -5)));
+            backgroundTriangles.push_back(Triangle(Point(x, y, -5), Point(x+3, y, -5), Point(x+3, y+3, -5)));
         }
     }
+    
     vector<pair<float, int> > triangleSortData;
     static vector<GLfloat> g_vertex_buffer;
+    static vector<GLfloat> g_color_buffer;
+    
+    
 
-    sortedTriangles.resize(unsortedTriangles.size());
-    triangleSortData.resize(unsortedTriangles.size());
-
-
+    Polyhedron player = ShapeBuilder::buildCube(0, 0, 0, 1);
+    
     // Check if the ESC key was pressed or the window was closed
     while (glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
            glfwWindowShouldClose(window) == 0 ) {
-
-    
+        
+        unsortedTriangles = backgroundTriangles;
+        
+        player.addToTriangles(&unsortedTriangles);
+        sortedTriangles.resize(unsortedTriangles.size());
+        triangleSortData.resize(unsortedTriangles.size());
         
         for (int i=0; i<unsortedTriangles.size(); i++) {
             glm::vec3 camPos  = cameraManager.getCameraPosition();
             float dist = -unsortedTriangles[i].fakedist2(Point(camPos.x, camPos.y, camPos.z));
             triangleSortData[i] = (make_pair(dist, i));
         }
+        
         std::sort(triangleSortData.begin(), triangleSortData.end());
         for (int i=0; i<triangleSortData.size(); i++) {
             sortedTriangles[i] = unsortedTriangles[triangleSortData[i].second];
         }
         g_vertex_buffer.resize(0);
-        ShapeBuilder::convertToPoints(sortedTriangles, &g_vertex_buffer);
+        
+        
+        ShapeBuilder::convertToPoints(sortedTriangles, &g_vertex_buffer, &g_color_buffer);
+        
+        player.addToPoints(&g_vertex_buffer, &g_color_buffer);
         
         // This will identify our vertex buffer
         GLuint vertexbuffer;
@@ -85,11 +98,7 @@ int main(){
         // Give our vertices to OpenGL.
         glBufferData(GL_ARRAY_BUFFER, g_vertex_buffer.size()*sizeof(g_vertex_buffer.data()), g_vertex_buffer.data(), GL_STATIC_DRAW);
         
-        // One color for each vertex. They were generated randomly.
-        static vector<GLfloat> g_color_buffer;
-        for (int i=0; i<g_vertex_buffer.size(); i++) {
-            g_color_buffer.push_back(float_rand( 0.0f, 1.0f));
-        }
+     
         
         GLuint colorbuffer;
         glGenBuffers(1, &colorbuffer);
